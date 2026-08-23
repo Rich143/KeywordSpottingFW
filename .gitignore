@@ -53,3 +53,10 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# MacOS
+.DS_Store
+
+
+# Build
+build/
