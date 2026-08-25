@@ -103,19 +103,20 @@
     - ../Core/Src
     - ../Drivers/CMSIS-DSP/Source/TransformFunctions/
     - ../Drivers/CMSIS-DSP/Source/CommonTables/
-    - support/test_fft
-    #- ../Drivers/High_Level
+    - ../Drivers/CMSIS-DSP/Source/ComplexMathFunctions
+    - ../Drivers/CMSIS-DSP/Source/BasicMathFunctions
     - ../Lib
+    - ../Middlewares/ST/STM32_AI_AudioPreprocessing_Library/Src
+    - support/test_fft
+    - support/test_spectrogram
   :include:
     - ../Core/Inc
     - ../Drivers/CMSIS-DSP/Include
     - ../Drivers/CMSIS-DSP/PrivateInclude
-    - support/test_fft
-    #- ../Drivers/High_Level
-    #- ../Drivers/Components
-    #- ../Drivers
     - ../Lib
-    #- HeadersToMock
+    - ../Middlewares/ST/STM32_AI_AudioPreprocessing_Library/Inc
+    - support/test_fft
+    - support/test_spectrogram
   :support:
     - support
   :libraries: []
@@ -135,6 +136,7 @@
 :defines:
   :test:
     - TEST # Simple list option to add symbol 'TEST' to compilation of all files in all test executables
+    - __INLINE=inline
   :release: []
 
   # Enable to inject name of a test as a unique compilation symbol into its respective executable build. 
