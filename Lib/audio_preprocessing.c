@@ -3,11 +3,15 @@
 
 #include "audio_preprocessing.h"
 
-#define NFFT             SPECTROGRAM_FRAME_LEN
+#define NFFT             AUDIO_SPECTROGRAM_FRAME_LEN
 #define NMELS            30
+#define MEL_FMIN_HZ      125
+#define MEL_FMAX_HZ      7500
 
 #define SPECTROGRAM_ROWS NMELS
 #define SPECTROGRAM_COLS 32
+
+
 
 /* Private macro ------------------------------------------------------------*/
 
@@ -23,6 +27,10 @@ static float32_t aColBuffer[SPECTROGRAM_ROWS];
 static uint32_t SpectrColIndex;
 float32_t aWorkingBuffer1[NFFT];
 
+uint32_t melFilterStartIndices[NMELS];
+uint32_t melFilterStopIndices[NMELS];
+float32_t melFilterCoefficients[447];
+
 static arm_rfft_fast_instance_f32 S_Rfft;
 static MelFilterTypeDef           S_MelFilter;
 static SpectrogramTypeDef         S_Spectr;
@@ -31,22 +39,31 @@ static MelSpectrogramTypeDef      S_MelSpectr;
 /* Public functions ---------------------------------------------------------*/
 void audio_preprocessing_init(void) {
     /* Init RFFT */
-    arm_rfft_fast_init_1024_f32(&S_Rfft);
+    arm_rfft_fast_init_512_f32(&S_Rfft);
 
     /* Init Spectrogram */
     S_Spectr.pRfft    = &S_Rfft;
     S_Spectr.Type     = SPECTRUM_TYPE_POWER;
-    S_Spectr.pWindow  = (float32_t *) hannWin_1024;
-    S_Spectr.SampRate = 16000;
-    S_Spectr.FrameLen = 1024;
-    S_Spectr.FFTLen   = 1024;
+    S_Spectr.pWindow  = (float32_t *) hannWin_512;
+    S_Spectr.SampRate = AUDIO_SAMPLE_RATE_HZ;
+    S_Spectr.FrameLen = AUDIO_SPECTROGRAM_FRAME_LEN;
+    S_Spectr.FFTLen   = AUDIO_SPECTROGRAM_FRAME_LEN;
     S_Spectr.pScratch = aWorkingBuffer1;
 
     /* Init Mel filter */
-    S_MelFilter.pStartIndices = (uint32_t *) melFiltersStartIndices_1024_30;
-    S_MelFilter.pStopIndices  = (uint32_t *) melFiltersStopIndices_1024_30;
-    S_MelFilter.pCoefficients = (float32_t *) melFilterLut_1024_30;
-    S_MelFilter.NumMels       = 30;
+    S_MelFilter.pStartIndices = (uint32_t *) melFilterStartIndices;
+    S_MelFilter.pStopIndices  = (uint32_t *) melFilterStopIndices;
+    S_MelFilter.pCoefficients = (float32_t *) melFilterCoefficients;
+    S_MelFilter.NumMels       = NMELS;
+    S_MelFilter.FFTLen        = AUDIO_SPECTROGRAM_FRAME_LEN;
+    S_MelFilter.SampRate      = AUDIO_SAMPLE_RATE_HZ;
+    S_MelFilter.FMin          = MEL_FMIN_HZ;
+    S_MelFilter.FMax          = MEL_FMAX_HZ;
+    S_MelFilter.Formula       = MEL_SLANEY;
+    S_MelFilter.Normalize     = 1; // Area normalization enabled
+    S_MelFilter.Mel2F         = 0;
+    MelFilterbank_Init(&S_MelFilter);
+
 
     /* Init MelSpectrogram */
     S_MelSpectr.SpectrogramConf = &S_Spectr;
@@ -56,13 +73,12 @@ void audio_preprocessing_init(void) {
 }
 
 void audio_preprocessing_run(float32_t * pInSignal) {
-    float32_t pInSignalCopy[SPECTROGRAM_FRAME_LEN];
+    float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
 
 
     for (uint32_t i = 0; i < SPECTROGRAM_COLS; i++) {
-    /*for (uint32_t i = 0; i < 1; i++) {*/
         SpectrColIndex = i;
-        memcpy(pInSignalCopy, pInSignal, SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
+        memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
 
         MelSpectrogramColumn(&S_MelSpectr, pInSignalCopy, &aSpectrogram[SpectrColIndex * SPECTROGRAM_ROWS]);
     }

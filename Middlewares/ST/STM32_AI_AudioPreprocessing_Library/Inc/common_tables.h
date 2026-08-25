@@ -21,6 +21,7 @@
 
 #include "arm_math.h"
 
+extern const float32_t hannWin_512[512];
 extern const float32_t hannWin_1024[1024];
 extern const float32_t hannWin_2048[2048];
 extern const float32_t hammingWin_1024[1024];
