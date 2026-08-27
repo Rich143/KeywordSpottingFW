@@ -31,7 +31,7 @@ static SpectrogramTypeDef         S_Spectr;
 static MelSpectrogramTypeDef      S_MelSpectr;
 
 /* Public functions ---------------------------------------------------------*/
-void audio_preprocessing_init(void) {
+audio_preprocessing_status_t audio_preprocessing_init(void) {
     /* Init RFFT */
     arm_rfft_fast_init_512_f32(&S_Rfft);
 
@@ -64,9 +64,15 @@ void audio_preprocessing_init(void) {
     S_MelSpectr.MelFilter       = &S_MelFilter;
 
     SpectrColIndex = 0;
+
+    return AUDIO_PREPROCESSING_STATUS_OK;
 }
 
-void audio_preprocessing_run(float32_t * pInSignal) {
+audio_preprocessing_status_t audio_preprocessing_run(float32_t * pInSignal) {
+    if (SpectrColIndex >= AUDIO_SPECTROGRAM_COLS) {
+        return AUDIO_PREPROCESSING_STATUS_ERROR_SPECTROGRAM_FULL;
+    }
+
     float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
     memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
 
@@ -74,7 +80,9 @@ void audio_preprocessing_run(float32_t * pInSignal) {
     MelSpectrogramColumn(&S_MelSpectr, pInSignalCopy,
                          &aSpectrogram[SpectrColIndex * AUDIO_SPECTROGRAM_ROWS]);
 
-    SpectrColIndex = (SpectrColIndex + 1) % AUDIO_SPECTROGRAM_COLS;
+    SpectrColIndex++;
+
+    return AUDIO_PREPROCESSING_STATUS_OK;
 }
 
 float32_t * audio_preprocessing_get_spectrogram(void) {
@@ -84,3 +92,21 @@ float32_t * audio_preprocessing_get_spectrogram(void) {
 uint32_t audio_preprocessing_get_spectrogram_len(void) {
     return AUDIO_SPECTROGRAM_ROWS * AUDIO_SPECTROGRAM_COLS;
 }
+
+uint32_t audio_preprocessing_get_spectrogram_filled_cols(void) {
+    return SpectrColIndex;
+}
+
+audio_preprocessing_status_t audio_preprocessing_clear_spectrogram(void) {
+    SpectrColIndex = 0;
+
+    return AUDIO_PREPROCESSING_STATUS_OK;
+}
+
+
+/*
+ * pass in whole 1 second signal
+ * internally, break into frames with overlap
+ * return entire spectrogram
+ * Since this will be used on host os, we can allocate spectrogram on stack
+ */

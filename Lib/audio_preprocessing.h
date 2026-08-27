@@ -11,8 +11,16 @@
 #define AUDIO_SPECTROGRAM_ROWS      AUDIO_SPECTROGRAM_NMELS
 #define AUDIO_SPECTROGRAM_COLS      32
 
-void audio_preprocessing_init();
-void audio_preprocessing_run();
+typedef enum {
+    AUDIO_PREPROCESSING_STATUS_OK = 0,
+    AUDIO_PREPROCESSING_STATUS_ERROR_SPECTROGRAM_FULL,
+    AUDIO_PREPROCESSING_STATUS_ERROR_OTHER,
+} audio_preprocessing_status_t;
 
-float32_t *  audio_preprocessing_get_spectrogram(void);
-uint32_t     audio_preprocessing_get_spectrogram_len(void);
+audio_preprocessing_status_t audio_preprocessing_init();
+audio_preprocessing_status_t audio_preprocessing_run(float32_t * pInSignal);
+
+float32_t *audio_preprocessing_get_spectrogram(void);
+uint32_t   audio_preprocessing_get_spectrogram_len(void);
+uint32_t   audio_preprocessing_get_spectrogram_filled_cols(void);
+uint32_t   audio_preprocessing_clear_spectrogram(void);
