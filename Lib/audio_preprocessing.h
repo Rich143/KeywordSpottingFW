@@ -18,7 +18,7 @@ typedef enum {
 } audio_preprocessing_status_t;
 
 audio_preprocessing_status_t audio_preprocessing_init();
-audio_preprocessing_status_t audio_preprocessing_run(float32_t * pInSignal);
+audio_preprocessing_status_t audio_preprocessing_process_frame(float32_t * pInSignal);
 
 float32_t *audio_preprocessing_get_spectrogram(void);
 uint32_t   audio_preprocessing_get_spectrogram_len(void);

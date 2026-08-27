@@ -68,11 +68,13 @@ audio_preprocessing_status_t audio_preprocessing_init(void) {
     return AUDIO_PREPROCESSING_STATUS_OK;
 }
 
-audio_preprocessing_status_t audio_preprocessing_run(float32_t * pInSignal) {
+audio_preprocessing_status_t audio_preprocessing_process_frame(float32_t * pInSignal) {
     if (SpectrColIndex >= AUDIO_SPECTROGRAM_COLS) {
         return AUDIO_PREPROCESSING_STATUS_ERROR_SPECTROGRAM_FULL;
     }
 
+    // TODO: Avoid allocating on stack. Maybe can just overwrite in signal
+    // instead
     float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
     memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
 
