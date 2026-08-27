@@ -3,7 +3,8 @@
 
 #include "audio_preprocessing.h"
 #include "spectrogram_signal_input.h"
-#include "spectrogram_signal_output.h"
+#include "spectrogram_output.h"
+
 #include "test_helpers.h"
 
 #include "mel_filterbank.h"
@@ -47,11 +48,16 @@ void setUp(void) {
 void tearDown(void) {}
 
 void test_preproc(void) {
-    audio_preprocessing_run(spectrogram_signal_input);
+    for (int i = 0; i < AUDIO_SPECTROGRAM_COLS; i++) {
+        audio_preprocessing_run(spectrogram_signal_input);
+    }
 
     float32_t *spectrogram = audio_preprocessing_get_spectrogram();
     uint32_t spectrogram_len = audio_preprocessing_get_spectrogram_len();
 
+    check_signal_close(spectrogram, test_mel_spectrogram_output, spectrogram_len, 1e-4f);
+
+#if DEBUG_DUMP_FILTERED_OUTPUT
     // Print the spectrogram
     for (uint32_t i = 0; i < spectrogram_len; i++) {
         printf("%.7g ", spectrogram[i]);
@@ -60,4 +66,5 @@ void test_preproc(void) {
         }
     }
     printf("\n");
+#endif
 }

@@ -4,31 +4,25 @@
 #include "audio_preprocessing.h"
 
 #define NFFT             AUDIO_SPECTROGRAM_FRAME_LEN
-#define NMELS            30
 #define MEL_FMIN_HZ      125
 #define MEL_FMAX_HZ      7500
-
-#define SPECTROGRAM_ROWS NMELS
-#define SPECTROGRAM_COLS 32
-
-
 
 /* Private macro ------------------------------------------------------------*/
 
 /* Private variables --------------------------------------------------------*/
 static float32_t
-    aSpectrogram[SPECTROGRAM_ROWS * SPECTROGRAM_COLS]; // Stored in
+    aSpectrogram[AUDIO_SPECTROGRAM_ROWS * AUDIO_SPECTROGRAM_COLS]; // Stored in
                                                        // column-major format
                                                        // for easier access to
                                                        // a frames worth
                                                        // (single column) of
                                                        // data
-static float32_t aColBuffer[SPECTROGRAM_ROWS];
+static float32_t aColBuffer[AUDIO_SPECTROGRAM_ROWS];
 static uint32_t SpectrColIndex;
 float32_t aWorkingBuffer1[NFFT];
 
-uint32_t melFilterStartIndices[NMELS];
-uint32_t melFilterStopIndices[NMELS];
+uint32_t melFilterStartIndices[AUDIO_SPECTROGRAM_NMELS];
+uint32_t melFilterStopIndices[AUDIO_SPECTROGRAM_NMELS];
 float32_t melFilterCoefficients[447];
 
 static arm_rfft_fast_instance_f32 S_Rfft;
@@ -54,7 +48,7 @@ void audio_preprocessing_init(void) {
     S_MelFilter.pStartIndices = (uint32_t *) melFilterStartIndices;
     S_MelFilter.pStopIndices  = (uint32_t *) melFilterStopIndices;
     S_MelFilter.pCoefficients = (float32_t *) melFilterCoefficients;
-    S_MelFilter.NumMels       = NMELS;
+    S_MelFilter.NumMels       = AUDIO_SPECTROGRAM_NMELS;
     S_MelFilter.FFTLen        = AUDIO_SPECTROGRAM_FRAME_LEN;
     S_MelFilter.SampRate      = AUDIO_SAMPLE_RATE_HZ;
     S_MelFilter.FMin          = MEL_FMIN_HZ;
@@ -74,14 +68,13 @@ void audio_preprocessing_init(void) {
 
 void audio_preprocessing_run(float32_t * pInSignal) {
     float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
+    memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
 
 
-    for (uint32_t i = 0; i < SPECTROGRAM_COLS; i++) {
-        SpectrColIndex = i;
-        memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
+    MelSpectrogramColumn(&S_MelSpectr, pInSignalCopy,
+                         &aSpectrogram[SpectrColIndex * AUDIO_SPECTROGRAM_ROWS]);
 
-        MelSpectrogramColumn(&S_MelSpectr, pInSignalCopy, &aSpectrogram[SpectrColIndex * SPECTROGRAM_ROWS]);
-    }
+    SpectrColIndex = (SpectrColIndex + 1) % AUDIO_SPECTROGRAM_COLS;
 }
 
 float32_t * audio_preprocessing_get_spectrogram(void) {
@@ -89,5 +82,5 @@ float32_t * audio_preprocessing_get_spectrogram(void) {
 }
 
 uint32_t audio_preprocessing_get_spectrogram_len(void) {
-    return SPECTROGRAM_ROWS * SPECTROGRAM_COLS;
+    return AUDIO_SPECTROGRAM_ROWS * AUDIO_SPECTROGRAM_COLS;
 }

@@ -1,7 +1,6 @@
 #include <float.h>
 #include "unity.h"
 
-#include "audio_preprocessing.h"
 #include "test_signal_input.h"
 #include "test_signal_fft_output.h"
 #include "test_helpers.h"

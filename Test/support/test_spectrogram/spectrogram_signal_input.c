@@ -1,5 +1,18 @@
 #include "spectrogram_signal_input.h"
 
+/*
+def gen_sig_and_plot(num_samples=1024, fs=16000):
+    # --- 1. Generate a test signal ---
+    t = np.arange(num_samples) / fs   # sample times, based on fixed sample count
+
+    f1, f2 = 440, 1200   # frequencies of two tones (Hz)
+    signal = (
+        1.0 * np.sin(2 * np.pi * f1 * t) +
+        0.5 * np.sin(2 * np.pi * f2 * t) +
+        0.1 * np.random.randn(num_samples)    # a bit of noise
+    )
+*/
+
 const uint32_t SPECTROGRAM_SIGNAL_INPUT_LEN = 1024;
 
 float32_t spectrogram_signal_input[1024] = {
