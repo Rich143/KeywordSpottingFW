@@ -101,20 +101,36 @@
   :source:
     - ../Core/Inc
     - ../Core/Src
+
+    # CMSIS DSP
     - ../Drivers/CMSIS-DSP/Source/TransformFunctions/
     - ../Drivers/CMSIS-DSP/Source/CommonTables/
     - ../Drivers/CMSIS-DSP/Source/ComplexMathFunctions
     - ../Drivers/CMSIS-DSP/Source/BasicMathFunctions
-    - ../Lib
+
+    # Lib
+    - ../Lib/AudioPreprocessing
+
+    # Middlewares
     - ../Middlewares/ST/STM32_AI_AudioPreprocessing_Library/Src
+
+    # Support
     - support/test_fft
     - support/test_spectrogram
   :include:
     - ../Core/Inc
+
+    # CMSIS DSP
     - ../Drivers/CMSIS-DSP/Include
     - ../Drivers/CMSIS-DSP/PrivateInclude
-    - ../Lib
+
+    # Lib
+    - ../Lib/AudioPreprocessing
+
+    # Middlewares
     - ../Middlewares/ST/STM32_AI_AudioPreprocessing_Library/Inc
+
+    # Support
     - support/test_fft
     - support/test_spectrogram
   :support:

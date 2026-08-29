@@ -17,7 +17,6 @@ static float32_t
                                                        // a frames worth
                                                        // (single column) of
                                                        // data
-static float32_t aColBuffer[AUDIO_SPECTROGRAM_ROWS];
 static uint32_t SpectrColIndex;
 float32_t aWorkingBuffer1[NFFT];
 

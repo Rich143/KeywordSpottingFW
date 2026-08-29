@@ -23,4 +23,4 @@ audio_preprocessing_status_t audio_preprocessing_process_frame(float32_t * pInSi
 float32_t *audio_preprocessing_get_spectrogram(void);
 uint32_t   audio_preprocessing_get_spectrogram_len(void);
 uint32_t   audio_preprocessing_get_spectrogram_filled_cols(void);
-uint32_t   audio_preprocessing_clear_spectrogram(void);
+audio_preprocessing_status_t   audio_preprocessing_clear_spectrogram(void);
