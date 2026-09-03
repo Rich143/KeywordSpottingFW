@@ -103,10 +103,10 @@
     - ../Core/Src
 
     # CMSIS DSP
-    - ../Drivers/CMSIS-DSP/Source/TransformFunctions/
-    - ../Drivers/CMSIS-DSP/Source/CommonTables/
-    - ../Drivers/CMSIS-DSP/Source/ComplexMathFunctions
-    - ../Drivers/CMSIS-DSP/Source/BasicMathFunctions
+    - ../Middlewares/ARM/CMSIS-DSP/Source/TransformFunctions/
+    - ../Middlewares/ARM/CMSIS-DSP/Source/CommonTables/
+    - ../Middlewares/ARM/CMSIS-DSP/Source/ComplexMathFunctions
+    - ../Middlewares/ARM/CMSIS-DSP/Source/BasicMathFunctions
 
     # Lib
     - ../Lib/AudioPreprocessing
@@ -121,8 +121,8 @@
     - ../Core/Inc
 
     # CMSIS DSP
-    - ../Drivers/CMSIS-DSP/Include
-    - ../Drivers/CMSIS-DSP/PrivateInclude
+    - ../Middlewares/ARM/CMSIS-DSP/Include
+    - ../Middlewares/ARM/CMSIS-DSP/PrivateInclude
 
     # Lib
     - ../Lib/AudioPreprocessing

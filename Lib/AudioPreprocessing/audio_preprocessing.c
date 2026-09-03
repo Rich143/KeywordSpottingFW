@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "feature_extraction.h"
 #include "arm_math.h"
 
@@ -103,11 +105,3 @@ audio_preprocessing_status_t audio_preprocessing_clear_spectrogram(void) {
 
     return AUDIO_PREPROCESSING_STATUS_OK;
 }
-
-
-/*
- * pass in whole 1 second signal
- * internally, break into frames with overlap
- * return entire spectrogram
- * Since this will be used on host os, we can allocate spectrogram on stack
- */
