@@ -1,9 +1,11 @@
-#ifndef TEST_MEL_SPECTROGRAM_OUTPUT_H
-#define TEST_MEL_SPECTROGRAM_OUTPUT_H
+#ifndef SPECTROGRAM_OUTPUT_H
+#define SPECTROGRAM_OUTPUT_H
 
-#include "arm_math.h"
+#include <stdint.h>
+#include "arm_math_types.h"  /* for float32_t */
 
-extern const uint32_t TEST_MEL_SPECTROGRAM_OUTPUT_LEN;
-extern float32_t test_mel_spectrogram_output[960];
+#define SPECTROGRAM_OUTPUT_LEN (1350)
 
-#endif // TEST_MEL_SPECTROGRAM_OUTPUT_H
+extern const float32_t spectrogram_output[SPECTROGRAM_OUTPUT_LEN];
+
+#endif /* SPECTROGRAM_OUTPUT_H */

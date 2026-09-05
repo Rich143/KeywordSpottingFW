@@ -1,4 +1,5 @@
 #include <string.h>
+#include <math.h>
 
 #include "feature_extraction.h"
 #include "arm_math.h"
@@ -8,6 +9,12 @@
 #define NFFT             AUDIO_SPECTROGRAM_FRAME_LEN
 #define MEL_FMIN_HZ      125
 #define MEL_FMAX_HZ      7500
+
+// Log Scale and normalization
+/// TODO: Update these to correct values
+#define LOG_EPSILON      1e-6
+#define LOG_MEL_MEAN     0.0
+#define LOG_MEL_STDDEV   1.0
 
 /* Private macro ------------------------------------------------------------*/
 
@@ -69,19 +76,29 @@ audio_preprocessing_status_t audio_preprocessing_init(void) {
     return AUDIO_PREPROCESSING_STATUS_OK;
 }
 
+void log_scale_normalize_column(float32_t *column) {
+
+    for (uint32_t i = 0; i < AUDIO_SPECTROGRAM_ROWS; i++) {
+        column[i] = logf(column[i] + LOG_EPSILON);
+    }
+
+    // subtract global mean
+    arm_offset_f32(column, -LOG_MEL_MEAN, column,
+                   AUDIO_SPECTROGRAM_ROWS);
+    // divide by global std
+    arm_scale_f32(column, 1.0f/LOG_MEL_STDDEV, column,
+                  AUDIO_SPECTROGRAM_ROWS);
+}
+
 audio_preprocessing_status_t audio_preprocessing_process_frame(float32_t * pInSignal) {
     if (SpectrColIndex >= AUDIO_SPECTROGRAM_COLS) {
         return AUDIO_PREPROCESSING_STATUS_ERROR_SPECTROGRAM_FULL;
     }
 
-    // TODO: Avoid allocating on stack. Maybe can just overwrite in signal
-    // instead
-    float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
-    memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
-
-
-    MelSpectrogramColumn(&S_MelSpectr, pInSignalCopy,
+    MelSpectrogramColumn(&S_MelSpectr, pInSignal,
                          &aSpectrogram[SpectrColIndex * AUDIO_SPECTROGRAM_ROWS]);
+
+    log_scale_normalize_column(&aSpectrogram[SpectrColIndex * AUDIO_SPECTROGRAM_ROWS]);
 
     SpectrColIndex++;
 

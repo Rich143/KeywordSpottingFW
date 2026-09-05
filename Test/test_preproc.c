@@ -52,6 +52,8 @@ TEST_SOURCE_FILE("../Middlewares/ST/STM32_AI_AudioPreprocessing_Library/Src/dct.
 // Other CMSIS-DSP source files needed by Audio preproc Lib
 TEST_SOURCE_FILE("../Drivers/CMSIS-DSP/Source/ComplexMathFunctions/arm_cmplx_mag_squared_f32.c")
 TEST_SOURCE_FILE("../Drivers/CMSIS-DSP/Source/BasicMathFunctions/arm_mult_f32.c")
+TEST_SOURCE_FILE("../Drivers/CMSIS-DSP/Source/BasicMathFunctions/arm_scale_f32.c")
+TEST_SOURCE_FILE("../Drivers/CMSIS-DSP/Source/BasicMathFunctions/arm_offset_f32.c")
 
 void setUp(void) {
     TEST_PREPROC_OK(audio_preprocessing_init());
@@ -59,15 +61,20 @@ void setUp(void) {
 
 void tearDown(void) {}
 
+void process_frame_and_check_result(float32_t *pInSignal) {
+    float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
+
+    memcpy(pInSignalCopy, pInSignal, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
+    TEST_PREPROC_OK(audio_preprocessing_process_frame(pInSignalCopy));
+}
+
 void test_preproc(void) {
     for (int i = 0; i < AUDIO_SPECTROGRAM_COLS; i++) {
-        TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
+        process_frame_and_check_result(spectrogram_signal_input);
     }
 
     float32_t *spectrogram = audio_preprocessing_get_spectrogram();
     uint32_t spectrogram_len = audio_preprocessing_get_spectrogram_len();
-
-    check_signal_close(spectrogram, test_mel_spectrogram_output, spectrogram_len, 1e-4f);
 
 #if DEBUG_DUMP_FILTERED_OUTPUT
     // Print the spectrogram
@@ -79,43 +86,53 @@ void test_preproc(void) {
     }
     printf("\n");
 #endif
+
+    check_signal_close(spectrogram, spectrogram_output, spectrogram_len, 1e-4f);
 }
 
 void test_single_col(void) {
-    TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
+
+    process_frame_and_check_result(spectrogram_signal_input);
     
     TEST_ASSERT_EQUAL_MESSAGE(1, audio_preprocessing_get_spectrogram_filled_cols(), "Only one column should be filled");
 }
 
 void test_two_cols(void) {
-    TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
-    TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
+    float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
+
+    process_frame_and_check_result(spectrogram_signal_input);
+
+    process_frame_and_check_result(spectrogram_signal_input);
     
     TEST_ASSERT_EQUAL_MESSAGE(2, audio_preprocessing_get_spectrogram_filled_cols(), "Two columns should be filled");
 }
 
 void test_full_spectrogram(void) {
     for (int i = 0; i < AUDIO_SPECTROGRAM_COLS; i++) {
-        TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
+        process_frame_and_check_result(spectrogram_signal_input);
     }
     
     TEST_ASSERT_EQUAL_MESSAGE(AUDIO_SPECTROGRAM_COLS, audio_preprocessing_get_spectrogram_filled_cols(), "All columns should be filled");
 }
 
 void test_add_to_full_spectrogram(void) {
+
     for (int i = 0; i < AUDIO_SPECTROGRAM_COLS; i++) {
-        TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
+        process_frame_and_check_result(spectrogram_signal_input);
     }
     TEST_ASSERT_EQUAL_MESSAGE(AUDIO_SPECTROGRAM_COLS, audio_preprocessing_get_spectrogram_filled_cols(), "All columns should be filled");
 
-    TEST_PREPROC_STATUS(AUDIO_PREPROCESSING_STATUS_ERROR_SPECTROGRAM_FULL, audio_preprocessing_process_frame(spectrogram_signal_input));
+    float32_t pInSignalCopy[AUDIO_SPECTROGRAM_FRAME_LEN];
+    memcpy(pInSignalCopy, spectrogram_signal_input, AUDIO_SPECTROGRAM_FRAME_LEN * sizeof(float32_t));
+
+    TEST_PREPROC_STATUS(AUDIO_PREPROCESSING_STATUS_ERROR_SPECTROGRAM_FULL, audio_preprocessing_process_frame(pInSignalCopy));
 
     TEST_ASSERT_EQUAL_MESSAGE(AUDIO_SPECTROGRAM_COLS, audio_preprocessing_get_spectrogram_filled_cols(), "All columns should be filled");
 }
 
 void test_clear_full_spectrogram(void) {
     for (int i = 0; i < AUDIO_SPECTROGRAM_COLS; i++) {
-        TEST_PREPROC_OK(audio_preprocessing_process_frame(spectrogram_signal_input));
+        process_frame_and_check_result(spectrogram_signal_input);
     }
     
     TEST_ASSERT_EQUAL_MESSAGE(AUDIO_SPECTROGRAM_COLS, audio_preprocessing_get_spectrogram_filled_cols(), "All columns should be filled");
