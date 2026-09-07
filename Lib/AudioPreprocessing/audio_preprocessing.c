@@ -11,10 +11,10 @@
 #define MEL_FMAX_HZ      7500
 
 // Log Scale and normalization
-/// TODO: Update these to correct values
 #define LOG_EPSILON      1e-6
-#define LOG_MEL_MEAN     0.0
-#define LOG_MEL_STDDEV   1.0
+/// Calculated using tf normalization layer across whole dataset
+#define LOG_MEL_MEAN     -5.471536159515381
+#define LOG_MEL_STDDEV   5.04770844844
 
 /* Private macro ------------------------------------------------------------*/
 
